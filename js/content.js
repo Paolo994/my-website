@@ -1,0 +1,536 @@
+/*
+ * All the text of the site lives here, in English and Italian.
+ * To change a sentence, edit it in both languages: s('English', 'Italiano').
+ */
+(function () {
+  'use strict';
+
+  const LINKS = {
+    email: 'paolociotta1@gmail.com',
+    linkedin: 'https://www.linkedin.com/in/paolo-ciotta/',
+    github: 'https://github.com/Paolo994',
+    cv: 'assets/cv/Paolo_Ciotta_CV_EN.pdf'
+  };
+
+  const UI = {
+    en: {
+      role: 'Senior Backend Engineer',
+      hello: 'Hi, I’m',
+      pitch: 'I build and run the backend systems that thousands of people rely on every day, and lately I build AI agents too. Hop on my Hornet and explore.',
+      rideCta: 'Ride the map',
+      classicCta: 'Just read it',
+      startHint: { desktop: 'Ride with WASD or the arrow keys, or click anywhere on the map.', touch: 'Tap anywhere on the map and the bike rides there.' },
+      hint: { desktop: 'WASD / arrows to ride · click to drive · E to enter', touch: 'Tap the map to ride · tap a building to enter' },
+      map: 'Map', classic: 'Classic view', ride: 'Ride the map', cv: 'Download CV',
+      discovered: 'Discovered',
+      enter: 'Enter',
+      menuTitle: 'Where to?',
+      backToMap: 'Back to the map',
+      nextStop: 'Next stop',
+      allFound: '🏁 You’ve seen everything! Let’s talk: head to the Post Office.',
+      madeWith: 'Hand-built with vanilla JavaScript & Canvas, no frameworks.',
+      ask: 'Ask about me',
+      askTitle: 'Ask about Paolo',
+      askSub: 'AI assistant · answers only from Paolo’s profile',
+      askHello: 'Hi! I’m Paolo’s assistant. Ask me anything about his experience, skills or projects, and I’ll answer straight from his profile.',
+      askPlaceholder: 'e.g. Has he used Kafka in production?',
+      askSend: 'Send',
+      askGo: 'Show me',
+      askThinking: 'Thinking…',
+      askNote: 'AI can make mistakes. For anything important, email Paolo.',
+      askSuggest: ['What does he work on day to day?', 'What has he built with AI agents?', 'Has he used Kafka in production?', 'Where is he based?'],
+      askErr: {
+        rate: 'That’s a lot of questions! Please wait a minute and try again.',
+        daily: 'The assistant has reached today’s limit. You can always email Paolo directly: paolociotta1@gmail.com',
+        offline: 'The assistant is offline right now. You can email Paolo directly: paolociotta1@gmail.com',
+        generic: 'Something went wrong. Please try again.'
+      }
+    },
+    it: {
+      role: 'Senior Backend Engineer',
+      hello: 'Ciao, sono',
+      pitch: 'Costruisco e mantengo in produzione sistemi backend che migliaia di persone usano ogni giorno, e ultimamente anche agenti AI. Sali sulla mia Hornet ed esplora.',
+      rideCta: 'Esplora in moto',
+      classicCta: 'Leggi e basta',
+      startHint: { desktop: 'Guida con WASD o le frecce, oppure clicca un punto della mappa.', touch: 'Tocca un punto della mappa e la moto ci va da sola.' },
+      hint: { desktop: 'WASD / frecce per guidare · clic per andare · E per entrare', touch: 'Tocca la mappa per guidare · tocca un edificio per entrare' },
+      map: 'Mappa', classic: 'Vista classica', ride: 'Esplora in moto', cv: 'Scarica CV',
+      discovered: 'Scoperti',
+      enter: 'Entra',
+      menuTitle: 'Dove andiamo?',
+      backToMap: 'Torna alla mappa',
+      nextStop: 'Prossima tappa',
+      allFound: '🏁 Hai visto tutto! Parliamone: vai all’Ufficio Postale.',
+      madeWith: 'Fatto a mano con JavaScript e Canvas, senza framework.',
+      ask: 'Chiedi di me',
+      askTitle: 'Chiedi di Paolo',
+      askSub: 'Assistente AI · risponde solo in base al profilo di Paolo',
+      askHello: 'Ciao! Sono l’assistente di Paolo. Chiedimi quello che vuoi sulla sua esperienza, le competenze o i progetti: rispondo basandomi sul suo profilo.',
+      askPlaceholder: 'es. Ha usato Kafka in produzione?',
+      askSend: 'Invia',
+      askGo: 'Fammi vedere',
+      askThinking: 'Ci penso…',
+      askNote: 'L’AI può sbagliare. Per le cose importanti, scrivi a Paolo.',
+      askSuggest: ['Di cosa si occupa ogni giorno?', 'Cosa ha costruito con gli agenti AI?', 'Ha usato Kafka in produzione?', 'Dove vive?'],
+      askErr: {
+        rate: 'Quante domande! Aspetta un minuto e riprova.',
+        daily: 'L’assistente ha raggiunto il limite di oggi. Puoi sempre scrivere a Paolo: paolociotta1@gmail.com',
+        offline: 'L’assistente al momento non è disponibile. Puoi scrivere a Paolo: paolociotta1@gmail.com',
+        generic: 'Qualcosa è andato storto. Riprova.'
+      }
+    }
+  };
+
+  // ---------- small HTML helpers ----------
+  const tags = (list) => `<div class="tags">${list.map((x) => `<span>${x}</span>`).join('')}</div>`;
+  const ul = (list) => `<ul>${list.map((x) => `<li>${x}</li>`).join('')}</ul>`;
+  const ext = (href, label) => `<a href="${href}" target="_blank" rel="noopener">${label}</a>`;
+
+  // ---------- tiny SVG diagram kit ----------
+  // box(x, y, w, h, 'line 1|line 2', kind)  kind: '' | 'hl' (highlight) | 'bad' | 'ok'
+  function box(x, y, w, h, label, kind = '') {
+    const lines = label.split('|');
+    const cy = y + h / 2 - ((lines.length - 1) * 15) / 2;
+    return `<g class="d-box ${kind}"><rect x="${x}" y="${y}" width="${w}" height="${h}"/>` +
+      lines.map((l, i) => `<text x="${x + w / 2}" y="${cy + i * 15}">${l}</text>`).join('') + '</g>';
+  }
+  function arrow(x1, y1, x2, y2, label = '', kind = '') {
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    const vertical = Math.abs(x2 - x1) < Math.abs(y2 - y1);
+    return `<g class="d-arrow ${kind}"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" marker-end="url(#arr-${kind || 'n'})"/>` +
+      (label ? `<text x="${vertical ? mx + 8 : mx}" y="${vertical ? my + 4 : my - 8}" ${vertical ? 'text-anchor="start"' : ''}>${label}</text>` : '') + '</g>';
+  }
+  const note = (x, y, text, kind = '') => `<text class="d-note ${kind}" x="${x}" y="${y}">${text}</text>`;
+  function svg(h, title, body) {
+    const marker = (id) => `<marker id="arr-${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="d-head ${id}"/></marker>`;
+    return `<figure class="diagram"><svg viewBox="0 0 480 ${h}" role="img" aria-label="${title}">
+      <defs>${marker('n')}${marker('bad')}${marker('ok')}${marker('dash')}</defs>${body}</svg></figure>`;
+  }
+
+  // ---------- case studies ----------
+  const CASES = [
+    {
+      id: 'kafka', icon: '📨',
+      title: { en: 'Unblocking sales with Kafka', it: 'Sbloccare le vendite con Kafka' },
+      result: { en: 'Sales no longer wait on external systems', it: 'Le vendite non aspettano più i sistemi esterni' },
+      diagram: (s) => svg(250, s('Before: synchronous call. After: asynchronous messaging through Kafka.', 'Prima: chiamata sincrona. Dopo: messaggi asincroni con Kafka.'),
+        note(10, 18, s('BEFORE', 'PRIMA'), 'bad') +
+        box(10, 30, 110, 50, s('Sales flow', 'Flusso di|vendita')) +
+        arrow(120, 55, 355, 55, s('sync call · waits', 'chiamata sincrona · attende'), 'bad') +
+        box(360, 30, 110, 50, s('External|system', 'Sistema|esterno'), 'bad') +
+        note(240, 100, s('slow or down = the sale is stuck', 'lento o giù = la vendita si blocca'), 'bad') +
+        note(10, 140, s('AFTER', 'DOPO'), 'ok') +
+        box(10, 152, 100, 56, s('Sales flow|continues', 'La vendita|prosegue'), 'ok') +
+        arrow(110, 180, 133, 180, '', 'ok') +
+        box(136, 152, 100, 56, 'Kafka|topic', 'hl') +
+        arrow(236, 180, 259, 180, '', 'ok') +
+        box(262, 152, 96, 56, s('Consumer|service', 'Servizio|consumer')) +
+        arrow(358, 180, 381, 180, '', 'ok') +
+        box(384, 152, 86, 56, s('External|system', 'Sistema|esterno')) +
+        note(240, 236, s('publish an event and move on; the slow part happens in the background', 'pubblica un evento e va avanti; la parte lenta avviene in background'), 'ok')),
+      body: (s) => `
+        <h4>${s('The problem', 'Il problema')}</h4>
+        <p>${s(
+          'Some steps of the FEU sales workflows called external systems synchronously. When one of them was slow or unavailable, the sale at the post office counter waited with it, or failed.',
+          'Alcuni passi dei flussi di vendita FEU chiamavano sistemi esterni in modo sincrono. Quando uno di questi era lento o non disponibile, la vendita allo sportello restava in attesa, o falliva.')}</p>
+        <h4>${s('What I did', 'Cosa ho fatto')}</h4>
+        <p>${s(
+          'I moved the steps that didn’t need an immediate answer to asynchronous messaging with Apache Kafka. The workflow publishes an event and carries on, and dedicated consumers talk to the external systems in the background.',
+          'Ho spostato i passi che non richiedevano una risposta immediata su messaggi asincroni con Apache Kafka. Il flusso pubblica un evento e prosegue, e consumer dedicati dialogano con i sistemi esterni in background.')}</p>
+        <h4>${s('The trade-offs', 'I compromessi')}</h4>
+        ${ul(s([
+          '<strong>Eventual consistency</strong>: some results arrive later, so the flow has to handle a “pending” state.',
+          '<strong>Failures move somewhere else</strong>: messages can be redelivered, so consumers must be idempotent and errors need a retry strategy.',
+          '<strong>More moving parts</strong>: topics, consumer groups and lag become things to monitor.'
+        ], [
+          '<strong>Consistenza eventuale</strong>: alcuni risultati arrivano dopo, quindi il flusso deve gestire uno stato “in attesa”.',
+          '<strong>Gli errori si spostano</strong>: i messaggi possono essere riconsegnati, quindi i consumer devono essere idempotenti e serve una strategia di retry.',
+          '<strong>Più componenti</strong>: topic, consumer group e lag diventano cose da monitorare.'
+        ]))}
+        <h4>${s('Result', 'Risultato')}</h4>
+        <p>${s('Sales workflows are no longer blocked by synchronous external calls.', 'I flussi di vendita non sono più bloccati dalle chiamate esterne sincrone.')}</p>`
+    },
+    {
+      id: 'cache', icon: '⚡',
+      title: { en: 'A distributed cache that cut external calls by ~25%', it: 'Una cache distribuita che ha ridotto le chiamate esterne del ~25%' },
+      result: { en: '~25% fewer external calls', it: '~25% di chiamate esterne in meno' },
+      diagram: (s) => svg(190, s('Service replicas read from a shared Hazelcast cache and call external services only on a miss.', 'Le repliche dei servizi leggono da una cache Hazelcast condivisa e chiamano i servizi esterni solo in caso di miss.'),
+        box(10, 40, 120, 70, s('Microservice|replicas|(OpenShift)', 'Repliche dei|microservizi|(OpenShift)')) +
+        arrow(130, 75, 175, 75, s('read', 'lettura')) +
+        box(178, 40, 124, 70, 'Hazelcast|distributed|cache', 'hl') +
+        arrow(302, 75, 347, 75, 'miss', 'dash') +
+        box(350, 40, 120, 70, s('External|services', 'Servizi|esterni')) +
+        note(240, 140, s('hit: answered from memory, shared by every replica', 'hit: risposta dalla memoria, condivisa da tutte le repliche'), 'ok') +
+        note(240, 165, s('miss: call once, store, reuse', 'miss: una chiamata, si salva, si riusa'))),
+      body: (s) => `
+        <h4>${s('The problem', 'Il problema')}</h4>
+        <p>${s(
+          'Many services, each running several replicas, kept asking external systems for the same data. Every repeated call added latency and load on systems we didn’t control.',
+          'Molti servizi, ognuno con più repliche, chiedevano continuamente gli stessi dati ai sistemi esterni. Ogni chiamata ripetuta aggiungeva latenza e carico su sistemi che non controllavamo.')}</p>
+        <h4>${s('What I did', 'Cosa ho fatto')}</h4>
+        <p>${s(
+          'I designed and implemented a distributed cache with Hazelcast, shared across service replicas: a value fetched once is available to every instance.',
+          'Ho progettato e implementato una cache distribuita con Hazelcast, condivisa tra le repliche dei servizi: un dato recuperato una volta è disponibile a tutte le istanze.')}</p>
+        <h4>${s('The trade-offs', 'I compromessi')}</h4>
+        ${ul(s([
+          '<strong>Freshness vs. savings</strong>: every type of data needs its own answer to “how stale is acceptable?”.',
+          '<strong>Memory is a budget</strong>: the cache has to be sized and bounded.',
+          '<strong>One more component to run</strong>, which also needs its own metrics.'
+        ], [
+          '<strong>Freschezza contro risparmio</strong>: ogni tipo di dato richiede la sua risposta a “quanto può essere vecchio?”.',
+          '<strong>La memoria è un budget</strong>: la cache va dimensionata e limitata.',
+          '<strong>Un componente in più da gestire</strong>, che ha bisogno delle sue metriche.'
+        ]))}
+        <h4>${s('Result', 'Risultato')}</h4>
+        <p>${s('About 25% fewer calls to external services.', 'Circa il 25% di chiamate in meno verso i servizi esterni.')}</p>`
+    },
+    {
+      id: 'datastore', icon: '🗄️',
+      title: { en: 'Choosing the datastore twice: MySQL → Ignite → PostgreSQL', it: 'Scegliere il datastore due volte: MySQL → Ignite → PostgreSQL' },
+      result: { en: 'Performance first, then reliability', it: 'Prima le prestazioni, poi l’affidabilità' },
+      diagram: (s) => svg(170, s('Datastore evolution from MySQL to Apache Ignite to PostgreSQL.', 'Evoluzione del datastore da MySQL ad Apache Ignite a PostgreSQL.'),
+        box(10, 30, 120, 56, 'MySQL') +
+        arrow(130, 58, 175, 58) +
+        box(178, 30, 124, 56, 'Apache|Ignite', 'hl') +
+        arrow(302, 58, 347, 58) +
+        box(350, 30, 120, 56, 'PostgreSQL', 'ok') +
+        note(70, 112, s('starting point', 'punto di partenza')) +
+        note(240, 112, s('in-memory: speed', 'in memoria: velocità')) +
+        note(240, 130, s('and scalability', 'e scalabilità')) +
+        note(410, 112, s('reliability and', 'affidabilità e'), 'ok') +
+        note(410, 130, s('maintainability', 'manutenibilità'), 'ok')),
+      body: (s) => `
+        <h4>${s('The story', 'La storia')}</h4>
+        <p>${s(
+          'I led the evolution of the platform’s primary datastore in two steps. First from MySQL to <strong>Apache Ignite</strong>, an in-memory data grid, for performance and scalability. Later to <strong>PostgreSQL</strong>, for reliability and long-term maintainability.',
+          'Ho guidato l’evoluzione del datastore principale della piattaforma in due passi. Prima da MySQL ad <strong>Apache Ignite</strong>, un data grid in memoria, per prestazioni e scalabilità. Poi a <strong>PostgreSQL</strong>, per affidabilità e manutenibilità nel lungo periodo.')}</p>
+        <h4>${s('What I learned', 'Cosa ho imparato')}</h4>
+        ${ul(s([
+          'The fastest option isn’t automatically the right one for the long run. Operating it, debugging it and finding people who know it all count.',
+          'Changing your mind is fine when the reasons are clear and measured. The second migration was as much an engineering decision as the first.',
+          'Migrations are mostly about the data and the cut-over plan, not the new technology.'
+        ], [
+          'L’opzione più veloce non è automaticamente quella giusta nel lungo periodo. Contano anche gestirla, farci debug e trovare persone che la conoscono.',
+          'Cambiare idea va bene quando le ragioni sono chiare e misurate. La seconda migrazione è stata una decisione di ingegneria quanto la prima.',
+          'Una migrazione riguarda soprattutto i dati e il piano di passaggio, non la nuova tecnologia.'
+        ]))}`
+    },
+    {
+      id: 'java', icon: '☕',
+      title: { en: 'Moving ~50 services from Java 8 to 21', it: 'Portare ~50 servizi da Java 8 a 21' },
+      result: { en: '100% of high/critical StackRox findings removed', it: 'Eliminate il 100% delle vulnerabilità alte/critiche StackRox' },
+      diagram: (s) => svg(150, s('Migration path Java 8 to 17 to 21.', 'Percorso di migrazione Java 8, 17, 21.'),
+        box(10, 30, 120, 56, 'Java 8', 'bad') +
+        arrow(130, 58, 175, 58) +
+        box(178, 30, 124, 56, 'Java 17') +
+        arrow(302, 58, 347, 58) +
+        box(350, 30, 120, 56, 'Java 21', 'ok') +
+        note(70, 112, s('~50 services', '~50 servizi'), 'bad') +
+        note(410, 112, s('0 high/critical', '0 alte/critiche'), 'ok') +
+        note(410, 130, 'StackRox findings', 'ok')),
+      body: (s) => `
+        <h4>${s('The problem', 'Il problema')}</h4>
+        <p>${s(
+          'Around 50 production services were still on Java 8, and the StackRox security scanner kept reporting high- and critical-severity findings.',
+          'Circa 50 servizi in produzione erano ancora su Java 8, e lo scanner di sicurezza StackRox continuava a segnalare vulnerabilità di gravità alta e critica.')}</p>
+        <h4>${s('What I did', 'Cosa ho fatto')}</h4>
+        <p>${s(
+          'I led the migration in two steps, first to Java 17 and then to Java 21, so each step stayed small enough to test and roll out safely across the whole ecosystem.',
+          'Ho guidato la migrazione in due passi, prima a Java 17 e poi a Java 21, così ogni passo restava abbastanza piccolo da testare e rilasciare in sicurezza su tutto l’ecosistema.')}</p>
+        <h4>${s('Why it worked', 'Perché ha funzionato')}</h4>
+        <p>${s(
+          'The test suite. The work I’d done on JUnit and Mockito coverage (defects found in test and pre-prod down by up to 80%) is what made touching 50 services at once a manageable risk.',
+          'La suite di test. Il lavoro fatto sulla copertura con JUnit e Mockito (difetti in test e pre-produzione ridotti fino all’80%) è ciò che ha reso gestibile il rischio di toccare 50 servizi insieme.')}</p>
+        <h4>${s('Result', 'Risultato')}</h4>
+        <p>${s('100% of high- and critical-severity StackRox findings eliminated, on a modern LTS runtime.', 'Eliminate il 100% delle vulnerabilità StackRox alte e critiche, su un runtime LTS moderno.')}</p>`
+    },
+    {
+      id: 'observability', icon: '🔭',
+      title: { en: 'Making production observable', it: 'Rendere osservabile la produzione' },
+      result: { en: 'Incidents resolved within one business day', it: 'Incidenti risolti entro un giorno lavorativo' },
+      diagram: (s) => svg(190, s('Services export metrics to Prometheus and Grafana and traces to Jaeger.', 'I servizi esportano metriche verso Prometheus e Grafana e tracce verso Jaeger.'),
+        box(10, 20, 100, 44, s('Service A', 'Servizio A')) +
+        arrow(110, 42, 185, 42, 'trace id') +
+        box(188, 20, 100, 44, s('Service B', 'Servizio B')) +
+        arrow(288, 42, 363, 42, 'trace id') +
+        box(366, 20, 104, 44, s('Service C', 'Servizio C')) +
+        arrow(150, 64, 150, 116, s('metrics', 'metriche')) +
+        arrow(330, 64, 330, 116, s('spans', 'span')) +
+        box(60, 120, 180, 50, 'Prometheus → Grafana', 'hl') +
+        box(270, 120, 120, 50, 'Jaeger', 'hl')),
+      body: (s) => `
+        <h4>${s('The problem', 'Il problema')}</h4>
+        <p>${s(
+          'With dozens of services involved in a single sale, finding where a request slowed down or failed meant digging through logs, service by service.',
+          'Con decine di servizi coinvolti in una singola vendita, capire dove una richiesta rallentava o falliva significava scavare nei log, un servizio alla volta.')}</p>
+        <h4>${s('What I did', 'Cosa ho fatto')}</h4>
+        <p>${s(
+          'I added Prometheus metrics and Jaeger distributed tracing, so one request can be followed across services and problems show up on dashboards before users report them.',
+          'Ho introdotto metriche Prometheus e tracing distribuito con Jaeger, così una richiesta si può seguire tra i servizi e i problemi compaiono nelle dashboard prima che li segnalino gli utenti.')}</p>
+        <h4>${s('Result', 'Risultato')}</h4>
+        <p>${s('Average production incident resolution brought within one business day.', 'Risoluzione media degli incidenti in produzione portata entro un giorno lavorativo.')}</p>`
+    }
+  ];
+
+  // ---------- sections (one per building on the map) ----------
+  // sign: text on the building (pixel font, keep it short, no accents)
+  const SECTIONS = [
+    {
+      id: 'about', icon: '🏠',
+      sign: { en: 'HOME', it: 'CASA' },
+      title: { en: 'About me', it: 'Chi sono' },
+      render: (s) => `
+        <div class="about-head">
+          <img src="assets/img/paolo.jpg" alt="Paolo Ciotta" width="120" height="120" loading="lazy">
+          <div>
+            <p class="lead">${s(
+              'Senior Backend Engineer with 7+ years of experience designing, building and operating cloud-native microservices in large enterprise environments.',
+              'Senior Backend Engineer con oltre 7 anni di esperienza nella progettazione, nello sviluppo e nella gestione di microservizi cloud-native in grandi contesti enterprise.')}</p>
+            <p class="meta">📍 ${s('Amsterdam, Netherlands · EU citizen · relocating', 'Amsterdam, Paesi Bassi · cittadino UE · in trasferimento')}</p>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>7+</b><span>${s('years in backend', 'anni nel backend')}</span></div>
+          <div class="stat"><b>~50</b><span>${s('microservices owned in production', 'microservizi gestiti in produzione')}</span></div>
+          <div class="stat"><b>~12,600</b><span>${s('post offices using them daily', 'uffici postali che li usano ogni giorno')}</span></div>
+          <div class="stat"><b>-80%</b><span>${s('defects found in test & pre-prod', 'difetti in test e pre-produzione')}</span></div>
+        </div>
+        <p>${s(
+          'At Reply I own the full lifecycle of about 50 Spring Boot microservices behind <strong>Poste Italiane’s FEU platform</strong>, the system post offices across Italy use to sell postal and financial products. My daily work is event-driven architecture, distributed caching, observability, CI/CD and mentoring.',
+          'In Reply gestisco l’intero ciclo di vita di circa 50 microservizi Spring Boot della <strong>piattaforma FEU di Poste Italiane</strong>, il sistema con cui gli uffici postali di tutta Italia vendono prodotti postali e finanziari. Il mio lavoro quotidiano: architetture event-driven, caching distribuito, osservabilità, CI/CD e mentoring.')}</p>
+        <p>${s(
+          'Lately I’m building <strong>AI and agentic systems</strong>: LLM integration, multi-agent orchestration with Spring AI, and tools that help developers debug faster.',
+          'Ultimamente costruisco <strong>sistemi AI e agentici</strong>: integrazione di LLM, orchestrazione multi-agente con Spring AI e strumenti che aiutano gli sviluppatori a fare debug più in fretta.')}</p>
+        <div class="callout">🧭 ${s(
+          'Short on time? Read the <a href="#" data-goto="cases">case studies</a>: they show how I think better than any list of technologies.',
+          'Hai poco tempo? Leggi i <a href="#" data-goto="cases">case study</a>: mostrano come ragiono meglio di qualsiasi elenco di tecnologie.')}</div>
+        <p class="meta">🗣️ ${s('Italian (native) · English (professional working proficiency)', 'Italiano (madrelingua) · Inglese (livello professionale)')}</p>`
+    },
+    {
+      id: 'experience', icon: '🏢',
+      sign: { en: 'OFFICE', it: 'UFFICIO' },
+      title: { en: 'Experience', it: 'Esperienza' },
+      render: (s) => `
+        <div class="job">
+          <div class="job-head"><h3>Senior Backend Engineer · Reply</h3><span class="period">2020 – ${s('present', 'oggi')} · ${s('Rome', 'Roma')}</span></div>
+          <h4>FEU (Unified Frontend) · ${s('Microservices ecosystem', 'Ecosistema di microservizi')} · Poste Italiane</h4>
+          ${ul(s([
+            'Designed, developed and maintained <strong>~50 Spring Boot microservices</strong> for sales and post-sales workflows of postal and financial products.',
+            'Led the migration <strong>Java 8 → 17 → 21</strong>, eliminating 100% of high- and critical-severity StackRox findings.',
+            'Introduced <strong>asynchronous Kafka messaging</strong> so that sales workflows are no longer blocked by synchronous external calls.',
+            'Designed a <strong>distributed Hazelcast cache</strong> that cut external service calls by ~25%.',
+            'Led the evolution of the primary datastore from MySQL to <strong>Apache Ignite</strong> for performance, then to <strong>PostgreSQL</strong> for reliability and long-term maintainability.',
+            'Automated <strong>CI/CD with Jenkins and Helm</strong> on OpenShift, handling per-environment configuration, scaling and resources.',
+            'Raised test quality with JUnit and Mockito, reducing defects found in test and pre-production by <strong>up to 80%</strong>.',
+            'Added <strong>Prometheus metrics and Jaeger tracing</strong>, bringing average production incident resolution within one business day.',
+            'Integrated MinIO and Azure Storage for document persistence and archival.',
+            'Worked with business analysts to turn functional requirements into technical specs, reducing rework.'
+          ], [
+            'Progettato, sviluppato e mantenuto <strong>~50 microservizi Spring Boot</strong> per i flussi di vendita e post-vendita di prodotti postali e finanziari.',
+            'Guidato la migrazione <strong>Java 8 → 17 → 21</strong>, eliminando il 100% delle vulnerabilità StackRox di gravità alta e critica.',
+            'Introdotto la <strong>messaggistica asincrona con Kafka</strong>, così i flussi di vendita non restano più bloccati da chiamate esterne sincrone.',
+            'Progettato una <strong>cache distribuita Hazelcast</strong> che ha ridotto del ~25% le chiamate ai servizi esterni.',
+            'Guidato l’evoluzione del datastore principale da MySQL ad <strong>Apache Ignite</strong> per le prestazioni, poi a <strong>PostgreSQL</strong> per affidabilità e manutenibilità.',
+            'Automatizzato la <strong>CI/CD con Jenkins e Helm</strong> su OpenShift, gestendo configurazioni per ambiente, scaling e risorse.',
+            'Migliorato la qualità dei test con JUnit e Mockito, riducendo fino all’<strong>80%</strong> i difetti trovati in test e pre-produzione.',
+            'Introdotto <strong>metriche Prometheus e tracing Jaeger</strong>, portando la risoluzione media degli incidenti in produzione entro un giorno lavorativo.',
+            'Integrato MinIO e Azure Storage per la persistenza e l’archiviazione dei documenti.',
+            'Lavorato con gli analisti di business per tradurre i requisiti funzionali in specifiche tecniche, riducendo le rilavorazioni.'
+          ]))}
+          ${tags(['Java 21', 'Spring Boot', 'Kafka', 'Hazelcast', 'Apache Ignite', 'PostgreSQL', 'OpenShift', 'Helm', 'Jenkins', 'Prometheus', 'Jaeger'])}
+          <p class="note">🔍 ${s('The stories behind these bullets are in the <a href="#" data-goto="cases">case studies</a>. Since 2026 I also work on AI projects: see the <a href="#" data-goto="ailab">Lab</a>.',
+            'Le storie dietro questi punti sono nei <a href="#" data-goto="cases">case study</a>. Dal 2026 lavoro anche a progetti AI: vedi il <a href="#" data-goto="ailab">Lab</a>.')}</p>
+        </div>
+        <div class="job">
+          <div class="job-head"><h3>Backend Developer · DsTech</h3><span class="period">2018 – 2020 · ${s('Rome', 'Roma')}</span></div>
+          <h4>PosteDelivery · ${s('consulting assignment at Reply', 'consulenza presso Reply')}</h4>
+          ${ul(s([
+            'Built backend microservices in Java 8 for purchasing and managing waybills and parcel shipments.',
+            'Implemented REST and SOAP services integrated with existing enterprise systems.',
+            'Worked with Oracle, first through JDBC and later through Hibernate/JPA.',
+            'Supported production troubleshooting and incident resolution in high-traffic environments.'
+          ], [
+            'Sviluppato microservizi backend in Java 8 per l’acquisto e la gestione di lettere di vettura e spedizioni.',
+            'Implementato servizi REST e SOAP integrati con i sistemi enterprise esistenti.',
+            'Lavorato su Oracle, prima con JDBC e poi con Hibernate/JPA.',
+            'Supportato il troubleshooting e la risoluzione di incidenti in produzione in ambienti ad alto traffico.'
+          ]))}
+          <h4>${s('Additional consulting & training', 'Altre consulenze e formazione')}</h4>
+          ${ul(s([
+            'Consultant at Accenture: Android features for the BPER Bank mobile app and UI updates for Sicuritalia apps.',
+            'Trained new hires on Java SE/EE: OOP, Hibernate, Spring, REST APIs and SQL.'
+          ], [
+            'Consulente in Accenture: funzionalità Android per l’app di BPER Banca e aggiornamenti UI per le app Sicuritalia.',
+            'Formazione ai nuovi assunti su Java SE/EE: OOP, Hibernate, Spring, API REST e SQL.'
+          ]))}
+        </div>`
+    },
+    {
+      id: 'cases', icon: '📐',
+      sign: { en: 'CASE STUDIES', it: 'CASI STUDIO' },
+      title: { en: 'Case studies', it: 'Case study' },
+      render: (s) => `
+        <p class="lead">${s(
+          'Five problems from production, how I approached them and what they cost. Details are kept general: no confidential client information.',
+          'Cinque problemi reali di produzione, come li ho affrontati e cosa sono costati. I dettagli restano generali: nessuna informazione riservata del cliente.')}</p>
+        ${CASES.map((c, i) => `
+          <details class="case" data-case="${c.id}"${i === 0 ? ' open' : ''}>
+            <summary>
+              <span class="case-icon" aria-hidden="true">${c.icon}</span>
+              <span class="case-title"><b>${c.title[s('en', 'it')]}</b><small>${c.result[s('en', 'it')]}</small></span>
+              <span class="case-chev" aria-hidden="true">▸</span>
+            </summary>
+            <div class="case-body">${c.diagram(s)}${c.body(s)}</div>
+          </details>`).join('')}`
+    },
+    {
+      id: 'ailab', icon: '🤖',
+      sign: { en: 'LAB', it: 'LAB' },
+      title: { en: 'AI lab & side projects', it: 'AI lab e progetti personali' },
+      render: (s) => `
+        <p class="lead">${s(
+          'Where backend engineering meets LLMs: agents that reason, use tools and get checked against real constraints before a human sees the result.',
+          'Dove l’ingegneria backend incontra gli LLM: agenti che ragionano, usano strumenti e vengono verificati su vincoli reali prima che un umano veda il risultato.')}</p>
+        <div class="card">
+          <div class="card-head"><h3>Multi-Agent AI Debugger</h3><span class="period">2026 – ${s('present', 'oggi')} · ${s('internal developer tool', 'tool interno per sviluppatori')}</span></div>
+          ${ul(s([
+            'An <strong>orchestrator agent</strong> picks the specialised agents each debugging task needs.',
+            'Tool-enabled agents read application logs, runtime errors, source code and technical docs, using project specs and error-handling rules as context.',
+            'Finds likely root causes, writes a fix that follows the project specs and <strong>compiles the project to validate it</strong> before proposing it to the developer.'
+          ], [
+            'Un <strong>agente orchestratore</strong> sceglie gli agenti specializzati che servono per ogni attività di debug.',
+            'Agenti dotati di strumenti leggono log applicativi, errori a runtime, codice sorgente e documentazione tecnica, usando le specifiche di progetto e le regole di gestione errori come contesto.',
+            'Individua le probabili cause, scrive una correzione coerente con le specifiche e <strong>compila il progetto per validarla</strong> prima di proporla allo sviluppatore.'
+          ]))}
+          ${tags(['Java', 'Spring Boot', 'Spring AI', 'Multi-agent', 'Tool calling'])}
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Multi-Agent Sales Funnel · Poste Italiane</h3><span class="period">2026 – ${s('present', 'oggi')} · ${s('early stage', 'fase iniziale')}</span></div>
+          ${ul(s([
+            'Helping define an agentic sales funnel that brings AI agents into FEU sales workflows for postal products.',
+            'Architecture analysis: agent responsibilities, orchestration approaches and integration points with the existing ecosystem.'
+          ], [
+            'Contribuisco a definire un funnel di vendita agentico che porta agenti AI nei flussi di vendita FEU dei prodotti postali.',
+            'Analisi architetturale: responsabilità degli agenti, approcci di orchestrazione e punti di integrazione con l’ecosistema esistente.'
+          ]))}
+          ${tags(['Agent orchestration', 'Architecture', 'LLM'])}
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>${s('Sentiment & Recommendation System', 'Sistema di sentiment e raccomandazione')}</h3><span class="period">2024 – 2026 · PoC</span></div>
+          ${ul(s([
+            'Led an internal proof of concept: Python backend using the <strong>OpenAI API</strong> for text embeddings and customer sentiment analysis.',
+            'Customer segmentation by clustering, with 2D dimensionality reduction for visualisation, feeding a cross-sell and up-sell recommendation engine.'
+          ], [
+            'Guidato un proof of concept interno: backend Python che usa le <strong>API OpenAI</strong> per embedding testuali e analisi del sentiment dei clienti.',
+            'Segmentazione clienti tramite clustering, con riduzione dimensionale 2D per la visualizzazione, alla base di un motore di raccomandazione per cross-sell e up-sell.'
+          ]))}
+          ${tags(['Python', 'OpenAI API', 'Embeddings', 'Clustering'])}
+        </div>
+        <h3 class="sub">${s('Side projects', 'Progetti personali')}</h3>
+        <div class="card">
+          <div class="card-head"><h3>🧊 Fridge Manager</h3>${ext(LINKS.github + '/fridge_manager', 'GitHub ↗')}</div>
+          <p>${s(
+            'A web app for what’s in the fridge: expiry dates, shopping list and recipes, with <strong>AI food recognition from photos</strong>. JWT auth, Docker Compose deployment (nginx + Spring Boot + PostgreSQL), responsive UI.',
+            'Una web app per il contenuto del frigorifero: scadenze, lista della spesa e ricette, con <strong>riconoscimento del cibo dalle foto tramite AI</strong>. Autenticazione JWT, deploy con Docker Compose (nginx + Spring Boot + PostgreSQL), interfaccia responsive.')}</p>
+          ${tags(['Java 21', 'Spring Boot 3.5', 'Spring Security', 'PostgreSQL', 'React', 'TypeScript', 'Docker', 'Claude API'])}
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>🏍️ ${s('This website', 'Questo sito')}</h3>${ext(LINKS.github + '/my-website', 'GitHub ↗')}</div>
+          <p>${s(
+            'Vanilla JavaScript and Canvas, no frameworks: pixel art drawn in code, bike physics and road-graph pathfinding (Dijkstra) for tap-to-ride.',
+            'JavaScript puro e Canvas, senza framework: pixel art disegnata via codice, fisica della moto e pathfinding sul grafo delle strade (Dijkstra) per il "tocca e vai".')}</p>
+          <p>${s(
+            'The <strong>“Ask about me” assistant</strong> runs on a Spring Boot (Java 21) backend that calls Claude through the official Anthropic Java SDK. It answers only from a curated profile, uses prompt caching and structured output (answer + the section to open next), and is protected by per-visitor rate limits and a global daily cap.',
+            'L’<strong>assistente “Chiedi di me”</strong> gira su un backend Spring Boot (Java 21) che chiama Claude tramite l’SDK Java ufficiale di Anthropic. Risponde solo in base a un profilo curato, usa prompt caching e structured output (risposta + sezione da aprire) ed è protetto da rate limit per visitatore e da un tetto giornaliero globale.')}</p>
+          ${tags(['JavaScript', 'Canvas', 'Pathfinding', 'Spring Boot', 'Java 21', 'Claude API', 'Docker'])}
+        </div>
+        <p class="note">🛠️ ${s('Daily AI-assisted development with Claude Code, GitHub Copilot and OpenAI Codex.', 'Sviluppo quotidiano assistito dall’AI con Claude Code, GitHub Copilot e OpenAI Codex.')}</p>`
+    },
+    {
+      id: 'skills', icon: '🧰',
+      sign: { en: 'TOOLBOX', it: 'OFFICINA' },
+      title: { en: 'Tech stack & education', it: 'Competenze e formazione' },
+      render: (s) => {
+        const groups = [
+          [s('Languages', 'Linguaggi'), ['Java 8/17/21', 'Python', 'SQL']],
+          ['Frameworks', ['Spring Boot', 'Spring MVC', 'Spring Data', 'Spring Security', 'Apache Camel']],
+          ['AI & agentic', ['Spring AI', 'OpenAI API', 'LLM integration', 'Multi-agent systems', 'Agent orchestration', 'Embeddings']],
+          [s('Messaging & caching', 'Messaggistica e caching'), ['Apache Kafka', 'Hazelcast', 'Apache Ignite', 'MinIO', 'Azure Storage']],
+          ['DevOps & containers', ['Kubernetes', 'OpenShift', 'Docker', 'Helm', 'Jenkins']],
+          ['Databases', ['PostgreSQL', 'Oracle', 'MySQL', 'Hibernate / JPA', 'JDBC']],
+          [s('Observability', 'Osservabilità'), ['Prometheus', 'Grafana', 'Jaeger', 'Kibana']],
+          ['Testing', ['JUnit', 'Mockito', 'Postman', 'SoapUI']],
+          [s('Practices', 'Pratiche'), ['Microservices', 'Event-driven architecture', 'Distributed caching', 'REST / SOAP', 'Agile / Scrum', 'Git']],
+          [s('AI-assisted dev', 'Sviluppo assistito da AI'), ['Claude Code', 'GitHub Copilot', 'OpenAI Codex']]
+        ];
+        return `<div class="skill-groups">${groups.map(([g, l]) => `<div class="skill-group"><h3>${g}</h3>${tags(l)}</div>`).join('')}</div>
+          <h3 class="sub">${s('Education & certifications', 'Formazione e certificazioni')}</h3>
+          <div class="card">
+            <div class="card-head"><h3>${s('Bachelor’s degree in Computer Science', 'Laurea triennale in Informatica')}</h3><span class="period">2013 – 2018</span></div>
+            <p>${s('University of Rome “Tor Vergata”', 'Università degli Studi di Roma “Tor Vergata”')}</p>
+            <p class="meta">${s(
+              'Thesis: natural language analysis of tweets with TF-IDF, measuring non-verbal communication through emoji.',
+              'Tesi: analisi del linguaggio naturale dei tweet con TF-IDF, per misurare la comunicazione non verbale attraverso le emoji.')}</p>
+          </div>
+          <div class="cert-grid">
+            <div class="cert"><span>🏅</span><div><b>VMware Spring Professional</b><small>${s('Certification', 'Certificazione')} · 2020</small></div></div>
+            <div class="cert"><span>🏅</span><div><b>MongoDB SI Associate</b><small>${s('Certification', 'Certificazione')} · 2023</small></div></div>
+            <div class="cert"><span>📘</span><div><b>MongoDB SI Architect</b><small>${s('Course', 'Corso')} · 2023</small></div></div>
+            <div class="cert"><span>📘</span><div><b>Red Hat OpenShift Development (DO288)</b><small>${s('Course', 'Corso')} · 2022</small></div></div>
+          </div>`;
+      }
+    },
+    {
+      id: 'garage', icon: '🏍️',
+      sign: { en: 'GARAGE', it: 'GARAGE' },
+      title: { en: 'Off the clock', it: 'Fuori dall’ufficio' },
+      render: (s) => `
+        <div class="passion">
+          <h3>🏍️ ${s('The Hornet', 'La Hornet')}</h3>
+          <p>${s(
+            'The bike on this map is real: my grey <strong>Honda Hornet 750</strong>. It’s how I reset: helmet on, a twisty road, no notifications.',
+            'La moto su questa mappa esiste davvero: è la mia <strong>Honda Hornet 750</strong> grigia. È il mio modo di staccare: casco, una strada piena di curve, niente notifiche.')}</p>
+          <div class="statbars">
+            <div class="statbar"><span>${s('Engine', 'Motore')}</span><div class="bar"><i style="width:75%"></i></div><b>755 cc</b></div>
+            <div class="statbar"><span>${s('Power', 'Potenza')}</span><div class="bar"><i style="width:70%"></i></div><b>~92 hp</b></div>
+            <div class="statbar"><span>${s('Fun', 'Divertimento')}</span><div class="bar"><i style="width:100%"></i></div><b>MAX</b></div>
+          </div>
+        </div>
+        <div class="passion">
+          <h3>✈️ ${s('Solo travel', 'Viaggi in solitaria')}</h3>
+          <p>${s(
+            'A backpack, a rough plan and room for the unexpected. Travelling alone made me comfortable with uncertainty and quick to adapt when the plan changes.',
+            'Uno zaino, un piano di massima e spazio per gli imprevisti. Viaggiare da solo mi ha reso a mio agio con l’incertezza e rapido ad adattarmi quando il piano cambia.')}</p>
+        </div>
+        <div class="passion">
+          <h3>🎮 ${s('Games', 'Videogiochi')}</h3>
+          <p>${s(
+            '<strong>Retro</strong>, <strong>adventure</strong> and <strong>strategy</strong>. Adventure games are basically debugging with a better soundtrack, and strategy is all trade-offs and limited resources, like architecture.',
+            '<strong>Retro</strong>, <strong>avventura</strong> e <strong>strategici</strong>. Le avventure sono in pratica debug con una colonna sonora migliore, e la strategia è fatta di compromessi e risorse limitate, come l’architettura.')}</p>
+        </div>
+        <div class="passion">
+          <h3>📚 ${s('Reading, writing & building', 'Leggere, scrivere e costruire')}</h3>
+          <p>${s(
+            'I read to learn and to switch off, I write because it forces clear thinking, and I build software on weekends too. Above all, I like finding solutions to problems.',
+            'Leggo per imparare e per staccare, scrivo perché obbliga a pensare in modo chiaro, e sviluppo software anche nel weekend. Soprattutto, mi piace trovare soluzioni ai problemi.')}</p>
+        </div>`
+    },
+    {
+      id: 'contact', icon: '📬',
+      sign: { en: 'POST OFFICE', it: 'POSTA' },
+      title: { en: 'Let’s talk', it: 'Parliamone' },
+      render: (s) => `
+        <p class="lead">${s(
+          'I’m open to Senior Backend and AI engineering roles in Amsterdam and the Netherlands. If you think we’d work well together, write me.',
+          'Sono aperto a ruoli di Senior Backend e AI engineering ad Amsterdam e nei Paesi Bassi. Se pensi che potremmo lavorare bene insieme, scrivimi.')}</p>
+        <div class="contact-grid">
+          <a class="contact" href="mailto:${LINKS.email}"><span>✉️</span><div><b>Email</b><small>${LINKS.email}</small></div></a>
+          <a class="contact" href="${LINKS.linkedin}" target="_blank" rel="noopener"><span>💼</span><div><b>LinkedIn</b><small>in/paolo-ciotta</small></div></a>
+          <a class="contact" href="${LINKS.github}" target="_blank" rel="noopener"><span>🐙</span><div><b>GitHub</b><small>Paolo994</small></div></a>
+          <a class="contact cv" href="${LINKS.cv}" download><span>📄</span><div><b>${s('Download CV', 'Scarica il CV')}</b><small>PDF · ${s('English', 'inglese')}</small></div></a>
+        </div>`
+    }
+  ];
+
+  window.SITE = { LINKS, UI, SECTIONS, CASES };
+})();

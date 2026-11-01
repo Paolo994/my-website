@@ -1,0 +1,16 @@
+# secrets: never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# build output and IDE
+backend/target/
+.idea/
+*.iml
+*.log
+node_modules/
+
+# CV contains a phone number: keep it out of the public repo
+assets/cv/Paolo_Ciotta_CV_EN.pdf

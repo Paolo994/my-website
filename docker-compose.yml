@@ -1,0 +1,28 @@
+# Site + AI assistant in one container.
+#   1. put your key in .env (ANTHROPIC_API_KEY=...)
+#   2. docker compose up -d --build
+#   3. open http://localhost:8787
+services:
+  site:
+    build: .
+    image: paolo-site
+    container_name: paolo-site
+    ports:
+      - "${HOST_PORT:-8787}:8787"
+    environment:
+      ASSISTANT_ENABLED: ${ASSISTANT_ENABLED:-true}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-opus-5-5}
+      ASSISTANT_EFFORT: ${ASSISTANT_EFFORT:-low}
+      RATE_PER_MINUTE: ${RATE_PER_MINUTE:-8}
+      RATE_PER_DAY: ${RATE_PER_DAY:-40}
+      RATE_GLOBAL_PER_DAY: ${RATE_GLOBAL_PER_DAY:-500}
+      LOG_QUESTIONS: ${LOG_QUESTIONS:-false}
+      SITE_PORT: "8787"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8787 && printf \"GET /actuator/health HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3'"]
+      interval: 30s
+      timeout: 5s
+      start_period: 40s
+      retries: 3

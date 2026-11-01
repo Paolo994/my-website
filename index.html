@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Paolo Ciotta · Senior Backend Engineer</title>
+  <meta name="description" content="Paolo Ciotta, Senior Backend Engineer: Java, Spring Boot, microservices, AI and agentic systems. Ride a Hornet 750 around the map to discover experience, projects and passions.">
+  <meta property="og:title" content="Paolo Ciotta · Senior Backend Engineer">
+  <meta property="og:description" content="Java · Spring Boot · Microservices · AI & Agentic Systems. Hop on the bike and explore.">
+  <meta property="og:image" content="assets/img/og.jpg">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#0f1020">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏍️</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="mode-start">
+
+  <!-- Top bar: always visible -->
+  <header class="topbar">
+    <a class="brand" href="#" data-action="home" aria-label="Paolo Ciotta">
+      <span class="brand-mark">PC</span>
+      <span class="brand-text"><strong>Paolo Ciotta</strong><small data-i18n="role"></small></span>
+    </a>
+    <nav class="topbar-actions">
+      <button class="btn btn-ghost only-game" data-action="menu" aria-haspopup="true"><span aria-hidden="true">🗺️</span> <span class="lbl" data-i18n="map"></span></button>
+      <button class="btn btn-ghost only-game" data-action="classic"><span aria-hidden="true">📄</span> <span class="lbl" data-i18n="classic"></span></button>
+      <button class="btn btn-ghost only-classic" data-action="ride"><span aria-hidden="true">🏍️</span> <span class="lbl" data-i18n="ride"></span></button>
+      <a class="btn btn-accent" data-cv download><span aria-hidden="true">⬇</span> <span class="lbl" data-i18n="cv"></span></a>
+      <div class="lang" role="group" aria-label="Language">
+        <button data-lang="en">EN</button><button data-lang="it">IT</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Start screen -->
+  <section class="start" id="start" aria-labelledby="start-title">
+    <div class="start-card">
+      <img class="start-photo" src="assets/img/paolo.jpg" alt="Paolo Ciotta" width="140" height="140">
+      <p class="start-kicker" data-i18n="hello"></p>
+      <h1 id="start-title">PAOLO CIOTTA</h1>
+      <p class="start-role" data-i18n="role"></p>
+      <p class="start-stack">Java · Spring Boot · Microservices · AI &amp; Agentic Systems</p>
+      <p class="start-pitch" data-i18n="pitch"></p>
+      <div class="start-buttons">
+        <button class="btn btn-accent btn-big" data-action="ride">▶ <span data-i18n="rideCta"></span></button>
+        <button class="btn btn-ghost btn-big" data-action="classic">📄 <span data-i18n="classicCta"></span></button>
+      </div>
+      <p class="start-hint" data-i18n-device="startHint"></p>
+    </div>
+  </section>
+
+  <!-- Game -->
+  <section class="game" id="game" aria-label="Interactive map">
+    <canvas id="world" tabindex="0" aria-label="Map with a motorbike you can ride to the sections of the site"></canvas>
+    <div class="hud">
+      <div class="hud-progress"><span data-i18n="discovered"></span> <strong id="progress">0/0</strong></div>
+      <div class="hud-hint" data-i18n-device="hint"></div>
+    </div>
+    <button class="prompt" id="prompt" hidden></button>
+    <canvas id="minimap" width="200" height="138" aria-label="Minimap"></canvas>
+    <div class="toast" id="toast" role="status" hidden></div>
+  </section>
+
+  <!-- Fast-travel menu -->
+  <div class="menu" id="menu" hidden>
+    <div class="menu-card" role="dialog" aria-modal="true" aria-labelledby="menu-title">
+      <div class="menu-head"><h2 id="menu-title" data-i18n="menuTitle"></h2><button class="x" data-action="close-menu" aria-label="Close">✕</button></div>
+      <ul id="menu-list"></ul>
+    </div>
+  </div>
+
+  <!-- Section panel (opens from the map) -->
+  <div class="panel-wrap" id="panel" hidden>
+    <article class="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title">
+      <header class="panel-head">
+        <span class="panel-icon" id="panel-icon" aria-hidden="true"></span>
+        <h2 id="panel-title"></h2>
+        <button class="x" data-action="close-panel" aria-label="Close">✕</button>
+      </header>
+      <div class="panel-body content" id="panel-body"></div>
+      <footer class="panel-foot">
+        <button class="btn btn-ghost" data-action="close-panel">← <span data-i18n="backToMap"></span></button>
+        <button class="btn btn-accent" data-action="next-zone"><span data-i18n="nextStop"></span> →</button>
+      </footer>
+    </article>
+  </div>
+
+  <!-- Classic, scrollable version of everything -->
+  <main class="classic" id="classic">
+    <div class="classic-inner">
+      <nav class="classic-nav" id="classic-nav" aria-label="Sections"></nav>
+      <div id="classic-sections" class="content"></div>
+      <footer class="classic-foot">© <span id="year"></span> Paolo Ciotta · <span data-i18n="madeWith"></span></footer>
+    </div>
+  </main>
+
+  <!-- "Ask about me": AI assistant (shown only when the backend is available) -->
+  <button class="ask-fab" id="ask-fab" hidden><span aria-hidden="true">💬</span> <span data-i18n="ask"></span></button>
+  <aside class="ask" id="ask" role="dialog" aria-labelledby="ask-title" hidden>
+    <header class="ask-head">
+      <div>
+        <h2 id="ask-title" data-i18n="askTitle"></h2>
+        <p data-i18n="askSub"></p>
+      </div>
+      <button class="x" aria-label="Close">✕</button>
+    </header>
+    <div class="ask-log" id="ask-log" aria-live="polite"></div>
+    <div class="ask-suggest" id="ask-suggest"></div>
+    <form class="ask-form" id="ask-form">
+      <input id="ask-input" type="text" maxlength="500" autocomplete="off" aria-label="Question">
+      <button class="btn btn-accent" type="submit" data-i18n="askSend"></button>
+    </form>
+    <p class="ask-note" data-i18n="askNote"></p>
+  </aside>
+
+  <noscript>
+    <div style="padding:24px;color:#fff;font-family:sans-serif">
+      Paolo Ciotta · Senior Backend Engineer ·
+      <a style="color:#ffb000" href="mailto:paolociotta1@gmail.com">paolociotta1@gmail.com</a> ·
+      <a style="color:#ffb000" href="https://www.linkedin.com/in/paolo-ciotta/">LinkedIn</a> ·
+      <a style="color:#ffb000" href="assets/cv/Paolo_Ciotta_CV_EN.pdf">CV (PDF)</a>
+    </div>
+  </noscript>
+
+  <script src="js/config.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/assistant.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

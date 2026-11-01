@@ -1,0 +1,46 @@
+server:
+  port: ${SITE_PORT:8787}
+  # behind a reverse proxy (Render, Fly.io, nginx...) use X-Forwarded-For to get the visitor IP
+  forward-headers-strategy: framework
+  compression:
+    enabled: true
+
+spring:
+  application:
+    name: site-assistant
+  web:
+    resources:
+      # The Docker image copies the static site here, so one container serves site + API.
+      # Locally the site is served separately (see README) and this folder is simply empty.
+      static-locations: ${SITE_DIR:classpath:/static/}
+      cache:
+        # browsers always revalidate (cheap 304 if unchanged), so a redeploy is picked up immediately
+        cachecontrol:
+          no-cache: true
+
+assistant:
+  # Master switch. false (or no key) = the assistant is off and the site hides the chat button.
+  active: ${ASSISTANT_ENABLED:true}
+  api-key: ${ANTHROPIC_API_KEY:}
+  model: ${ANTHROPIC_MODEL:claude-opus-5-5}
+  # low is plenty for short, grounded Q&A and keeps latency and cost down
+  effort: ${ASSISTANT_EFFORT:low}
+  max-tokens: 4000
+  max-question-length: 500
+  max-history-turns: 6
+  contact-email: paolociotta1@gmail.com
+  rate-limit:
+    per-minute: ${RATE_PER_MINUTE:8}
+    per-day: ${RATE_PER_DAY:40}
+    global-per-day: ${RATE_GLOBAL_PER_DAY:500}
+  # Origins allowed to call the API from another domain (e.g. the site on GitHub Pages).
+  # Local defaults: npx serve (3000), VS Code Live Server (5500), IntelliJ built-in server (63342).
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:3000,http://127.0.0.1:5500,http://localhost:5500,http://localhost:63342}
+  # Log the text of visitor questions (never their IP). Off by default for privacy.
+  log-questions: ${LOG_QUESTIONS:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

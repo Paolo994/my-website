@@ -1,0 +1,8 @@
+.idea
+.git
+.env
+.env.*
+backend/target
+**/node_modules
+*.md
+docker-compose.yml
