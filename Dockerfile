@@ -18,6 +18,8 @@ COPY css /app/site/css
 COPY js /app/site/js
 COPY assets /app/site/assets
 ENV SITE_DIR=file:/app/site/
+# The CV is served for download and read by the assistant; docker-compose mounts the real file here.
+ENV CV_PATH=/app/site/assets/cv/Paolo_Ciotta_CV_EN.pdf
 USER app
 EXPOSE 8787
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "/app/app.jar"]

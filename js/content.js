@@ -444,6 +444,8 @@
             'L’<strong>assistente “Chiedi di me”</strong> gira su un backend Spring Boot (Java 21) che chiama Claude tramite l’SDK Java ufficiale di Anthropic. Risponde solo in base a un profilo curato, usa prompt caching e structured output (risposta + sezione da aprire) ed è protetto da rate limit per visitatore e da un tetto giornaliero globale.')}</p>
           ${tags(['JavaScript', 'Canvas', 'Pathfinding', 'Spring Boot', 'Java 21', 'Claude API', 'Docker'])}
         </div>
+        <h3 class="sub">${s('Fresh from GitHub', 'Appena usciti da GitHub')}</h3>
+        <div class="gh-projects" data-gh-projects><p class="meta">${s('Loading repositories…', 'Carico i repository…')}</p></div>
         <p class="note">🛠️ ${s('Daily AI-assisted development with Claude Code, GitHub Copilot and OpenAI Codex.', 'Sviluppo quotidiano assistito dall’AI con Claude Code, GitHub Copilot e OpenAI Codex.')}</p>`
     },
     {

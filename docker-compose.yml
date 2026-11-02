@@ -19,6 +19,12 @@ services:
       RATE_GLOBAL_PER_DAY: ${RATE_GLOBAL_PER_DAY:-500}
       LOG_QUESTIONS: ${LOG_QUESTIONS:-false}
       SITE_PORT: "8787"
+      GITHUB_USER: ${GITHUB_USER:-Paolo994}
+      GITHUB_REFRESH: ${GITHUB_REFRESH:-24h}
+    volumes:
+      # Live CV: replace assets/cv/Paolo_Ciotta_CV_EN.pdf and both the download and the assistant
+      # use the new version immediately, no rebuild or restart needed.
+      - ./assets/cv:/app/site/assets/cv:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8787 && printf \"GET /actuator/health HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3'"]

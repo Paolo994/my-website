@@ -14,6 +14,8 @@ import com.anthropic.models.messages.TextBlockParam;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paolociotta.assistant.config.AssistantProperties;
+import com.paolociotta.assistant.github.GitHubProjects;
+import com.paolociotta.assistant.knowledge.CvSource;
 import com.paolociotta.assistant.knowledge.KnowledgeBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,14 +23,17 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Answers visitor questions about Paolo with a single, grounded Claude call.
  *
  * Design choices:
  * - The whole profile fits in the prompt, so there is no retrieval step: one call, low latency.
- * - The system prompt (rules + profile) never changes between requests and is marked for prompt
- *   caching, so repeated questions only pay full price for the short, variable part.
+ * - The system prompt (rules + profile + latest CV) only changes when the CV PDF is replaced, and is
+ *   marked for prompt caching, so repeated questions only pay full price for the short, variable part.
+ * - The live GitHub repository list goes in a second, uncached system block after the cache breakpoint,
+ *   so a new repo never invalidates the cached prompt.
  * - Structured output returns {answer, section}: the text to show plus which part of the site
  *   the visitor should open next, constrained to the real section ids.
  */
@@ -40,17 +45,25 @@ public class AssistantService {
     private final AnthropicClient client;
     private final AssistantProperties props;
     private final ObjectMapper mapper;
-    private final TextBlockParam systemPrompt;
+    private final KnowledgeBase kb;
+    private final CvSource cv;
+    private final GitHubProjects github;
     private final OutputConfig outputConfig;
 
-    public AssistantService(AnthropicClient client, AssistantProperties props, KnowledgeBase kb, ObjectMapper mapper) {
+    /** Cached system block, rebuilt only when the CV text changes. */
+    private record CachedPrompt(String cvText, TextBlockParam block) {
+    }
+
+    private volatile CachedPrompt cachedPrompt;
+
+    public AssistantService(AnthropicClient client, AssistantProperties props, KnowledgeBase kb, CvSource cv,
+                            GitHubProjects github, ObjectMapper mapper) {
         this.client = client;
         this.props = props;
         this.mapper = mapper;
-        this.systemPrompt = TextBlockParam.builder()
-                .text(SystemPrompt.build(kb.profile(), props.contactEmail()))
-                .cacheControl(CacheControlEphemeral.builder().ttl(CacheControlEphemeral.Ttl.TTL_1H).build())
-                .build();
+        this.kb = kb;
+        this.cv = cv;
+        this.github = github;
         this.outputConfig = OutputConfig.builder()
                 .effort(OutputConfig.Effort.of(props.effort()))
                 .format(JsonOutputFormat.builder().schema(replySchema()).build())
@@ -61,7 +74,7 @@ public class AssistantService {
         MessageCreateParams.Builder params = MessageCreateParams.builder()
                 .model(props.model())
                 .maxTokens(props.maxTokens())
-                .systemOfTextBlockParams(List.of(systemPrompt))
+                .systemOfTextBlockParams(systemBlocks())
                 .outputConfig(outputConfig)
                 // if a safety classifier ever declines, let the API retry on a fallback model
                 .putAdditionalHeader("anthropic-beta", "server-side-fallback-2026-07-01")
@@ -99,6 +112,29 @@ public class AssistantService {
                 props.logQuestions() ? ", question=\"" + request.question().strip() + "\"" : "");
 
         return toResponse(response);
+    }
+
+    List<TextBlockParam> systemBlocks() {
+        String cvText = cv.text();
+        CachedPrompt current = cachedPrompt;
+        if (current == null || !current.cvText().equals(cvText)) {
+            current = new CachedPrompt(cvText, TextBlockParam.builder()
+                    .text(SystemPrompt.build(kb.profile(), cvText, props.contactEmail()))
+                    .cacheControl(CacheControlEphemeral.builder().ttl(CacheControlEphemeral.Ttl.TTL_1H).build())
+                    .build());
+            cachedPrompt = current;
+        }
+        List<GitHubProjects.Project> repos = github.list();
+        if (repos.isEmpty()) {
+            return List.of(current.block());
+        }
+        String list = repos.stream()
+                .map(p -> "- " + p.name() + ": " + (p.description() == null ? "(no description)" : p.description())
+                        + (p.language() == null ? "" : " [" + p.language() + "]")
+                        + " updated " + p.pushedAt().substring(0, Math.min(10, p.pushedAt().length()))
+                        + " " + p.url())
+                .collect(Collectors.joining("\n"));
+        return List.of(current.block(), TextBlockParam.builder().text(SystemPrompt.liveContext(list.strip())).build());
     }
 
     AskResponse toResponse(Message response) {

@@ -12,7 +12,7 @@ import java.time.Clock;
 import java.time.Duration;
 
 @Configuration
-@EnableConfigurationProperties(AssistantProperties.class)
+@EnableConfigurationProperties({AssistantProperties.class, SiteProperties.class})
 public class AppConfig implements WebMvcConfigurer {
 
     private final AssistantProperties props;

@@ -18,6 +18,16 @@ spring:
         cachecontrol:
           no-cache: true
 
+site:
+  # The CV PDF: served for download AND read by the assistant. Replace the file and both update.
+  cv-path: ${CV_PATH:}
+  # Public, non-fork repositories of this user appear in the Lab and are known to the assistant.
+  github-user: ${GITHUB_USER:Paolo994}
+  # How often to re-read the repositories from GitHub (e.g. 30m, 1h, 24h). A restart always refreshes.
+  github-refresh: ${GITHUB_REFRESH:24h}
+  # Optional: only raises GitHub's rate limit. Never required.
+  github-token: ${GITHUB_TOKEN:}
+
 assistant:
   # Master switch. false (or no key) = the assistant is off and the site hides the chat button.
   active: ${ASSISTANT_ENABLED:true}

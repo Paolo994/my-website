@@ -5,6 +5,8 @@ Each building is a section (about, experience, case studies, AI lab, skills, pas
 There is also a classic, scrollable view for people in a hurry, EN/IT switching, and an
 **"Ask about me" AI assistant** backed by Spring Boot and Claude.
 
+Technical analysis (Italian): [docs/ANALISI_TECNICA.md](docs/ANALISI_TECNICA.md).
+
 ## Structure
 
 ```
@@ -36,8 +38,21 @@ Dockerfile            one container: static site + API
   length and history size limits. All configurable with env vars.
 - If the backend is unreachable or has no API key, the site hides the chat button and works as before.
 
-**Edit what it knows:** change `backend/src/main/resources/knowledge/profile.md`. Keep it factual: the
-assistant will repeat it to recruiters.
+**What it knows**, in order of priority:
+1. **The CV PDF** (`assets/cv/Paolo_Ciotta_CV_EN.pdf`): read automatically and re-read whenever the file
+   changes. With Docker Compose the folder is mounted live: replace the PDF and both the download and the
+   assistant use the new version immediately, no rebuild. Phone numbers are stripped before reaching the model.
+2. **`backend/src/main/resources/knowledge/profile.md`**: curated facts and case studies (the CV wins on conflicts).
+3. **Live GitHub repositories** of `GITHUB_USER`, refreshed every `GITHUB_REFRESH` (default 24h).
+
+## Live content
+
+- **CV:** see above. The CV file is not in git (it is personal); keep it locally in `assets/cv/`.
+- **GitHub projects:** every public, non-fork, non-archived repository appears automatically in the Lab under
+  "Fresh from GitHub" (repos with a hand-written card are listed in `CURATED` in `js/github.js`). The card uses
+  the repository description; if it's empty, the first paragraph of the README. Tip: give every repo an English
+  description and a few topics on GitHub, they become the card's text and tags.
+- **Site text** (`js/content.js`) is hand-written and does not change by itself when the CV changes.
 
 ### Configuration (env vars)
 
@@ -50,6 +65,10 @@ assistant will repeat it to recruiters.
 | `ALLOWED_ORIGINS` | localhost dev servers | comma-separated, when the site is hosted elsewhere |
 | `LOG_QUESTIONS` | `false` | log question text (never IPs) |
 | `SITE_PORT` | `8787` | HTTP port |
+| `CV_PATH` | set in Docker | CV PDF read by the assistant |
+| `GITHUB_USER` | `Paolo994` | whose repositories appear in the Lab |
+| `GITHUB_REFRESH` | `24h` | how often repositories are re-read (`30m`, `1h`, `24h`...) |
+| `GITHUB_TOKEN` | (none) | optional, only raises GitHub's rate limit |
 | `SITE_DIR` | (none) | folder with the static site to serve (set in Docker) |
 
 ## Run with Docker (recommended)

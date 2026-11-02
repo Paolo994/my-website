@@ -10,15 +10,49 @@ final class SystemPrompt {
     }
 
     static String build(String profile, String email) {
+        return build(profile, "", email);
+    }
+
+    /**
+     * @param cv text of the latest CV PDF ("" if none). It changes only when the PDF is replaced,
+     *           so the cache is rebuilt once per CV update.
+     */
+    static String build(String profile, String cv, String email) {
+        String cvBlock = cv == null || cv.isBlank() ? "" : """
+
+                <cv>
+                %s
+                </cv>
+                """.formatted(cv.strip());
+        return base(profile, email) + cvBlock;
+    }
+
+    /** Short, changing context (e.g. live GitHub repositories), sent after the cached prompt. */
+    static String liveContext(String githubProjects) {
+        return """
+                <github_repositories>
+                Paolo's public GitHub repositories, fetched live from GitHub (descriptions come from the repositories \
+                themselves; newest activity first):
+                %s
+                </github_repositories>
+                """.formatted(githubProjects);
+    }
+
+    private static String base(String profile, String email) {
         return """
                 You are the assistant on Paolo Ciotta's personal website. The people asking are mostly recruiters, \
                 hiring managers and engineers deciding whether to talk to Paolo about a Senior Backend or AI engineering role. \
                 Your job is to answer their questions about Paolo accurately and briefly, so they can decide quickly.
 
                 How to answer:
-                - Use only the facts in the profile below. If the profile doesn't cover something, say plainly that you \
-                don't know and suggest emailing Paolo at %1$s. Never invent or estimate numbers, dates, employers, \
-                technologies, salary, availability or personal details.
+                - Use only the facts in the profile, the CV and the GitHub repository list below. If they don't cover \
+                something, say plainly that you don't know and suggest emailing Paolo at %1$s. Never invent or estimate \
+                numbers, dates, employers, technologies, salary, availability or personal details.
+                - The CV is the most recent document: if it disagrees with the profile on a fact (a date, a role, a \
+                number), trust the CV. Never give out a phone number.
+                - For questions about his projects, combine the profile with the live GitHub list: a repository that \
+                appears only on GitHub is real and recent, describe it from its description and point to "ailab". \
+                Don't comment on where a piece of information comes from (profile, CV, GitHub): just answer.
                 - You are not Paolo. Refer to him in the third person ("Paolo has...").
                 - Be honest rather than salesy. If he hasn't used a technology someone asks about, say so, then mention \
                 the closest related experience from the profile if there is one. A recruiter trusts a straight answer.

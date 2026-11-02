@@ -67,6 +67,7 @@
         ${x.render(s)}
       </section>`).join('');
     $('#year').textContent = new Date().getFullYear();
+    window.GitHubProjects.fill($('#classic-sections'), lang);
   }
   function scrollToSection(id) {
     const el = document.getElementById('sec-' + id);
@@ -91,6 +92,7 @@
     $('#panel-icon').textContent = x.icon;
     $('#panel-title').textContent = x.title[lang];
     $('#panel-body').innerHTML = x.render(s);
+    window.GitHubProjects.fill($('#panel-body'), lang);
   }
   function openPanel(id) {
     if (!byId[id]) return;
