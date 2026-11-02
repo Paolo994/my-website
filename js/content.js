@@ -272,6 +272,31 @@
     }
   ];
 
+  // ---------- side projects with a hand-written card ----------
+  // Keyed by GitHub repository name. Every other public repo gets an automatic card from GitHub data;
+  // all of them are shown together in one list, most recently updated first (see js/github.js).
+  const PROJECTS = {
+    fridge_manager: (s) => `
+    <div class="card">
+      <div class="card-head"><h3>🧊 Fridge Manager</h3>${ext(LINKS.github + '/fridge_manager', 'GitHub ↗')}</div>
+      <p>${s(
+        'A web app for what’s in the fridge: expiry dates, shopping list and recipes, with <strong>AI food recognition from photos</strong>. JWT auth, Docker Compose deployment (nginx + Spring Boot + PostgreSQL), responsive UI.',
+        'Una web app per il contenuto del frigorifero: scadenze, lista della spesa e ricette, con <strong>riconoscimento del cibo dalle foto tramite AI</strong>. Autenticazione JWT, deploy con Docker Compose (nginx + Spring Boot + PostgreSQL), interfaccia responsive.')}</p>
+      ${tags(['Java 21', 'Spring Boot 3.5', 'Spring Security', 'PostgreSQL', 'React', 'TypeScript', 'Docker', 'Claude API'])}
+    </div>`,
+    'my-website': (s) => `
+    <div class="card">
+      <div class="card-head"><h3>🏍️ ${s('This website', 'Questo sito')}</h3>${ext(LINKS.github + '/my-website', 'GitHub ↗')}</div>
+      <p>${s(
+        'Vanilla JavaScript and Canvas, no frameworks: pixel art drawn in code, bike physics and road-graph pathfinding (Dijkstra) for tap-to-ride.',
+        'JavaScript puro e Canvas, senza framework: pixel art disegnata via codice, fisica della moto e pathfinding sul grafo delle strade (Dijkstra) per il "tocca e vai".')}</p>
+      <p>${s(
+        'The <strong>“Ask about me” assistant</strong> runs on a Spring Boot (Java 21) backend that calls Claude through the official Anthropic Java SDK. It answers only from a curated profile, uses prompt caching and structured output (answer + the section to open next), and is protected by per-visitor rate limits and a global daily cap.',
+        'L’<strong>assistente “Chiedi di me”</strong> gira su un backend Spring Boot (Java 21) che chiama Claude tramite l’SDK Java ufficiale di Anthropic. Risponde solo in base a un profilo curato, usa prompt caching e structured output (risposta + sezione da aprire) ed è protetto da rate limit per visitatore e da un tetto giornaliero globale.')}</p>
+      ${tags(['JavaScript', 'Canvas', 'Pathfinding', 'Spring Boot', 'Java 21', 'Claude API', 'Docker'])}
+    </div>`
+  };
+
   // ---------- sections (one per building on the map) ----------
   // sign: text on the building (pixel font, keep it short, no accents)
   const SECTIONS = [
@@ -427,25 +452,8 @@
           ${tags(['Python', 'OpenAI API', 'Embeddings', 'Clustering'])}
         </div>
         <h3 class="sub">${s('Side projects', 'Progetti personali')}</h3>
-        <div class="card">
-          <div class="card-head"><h3>🧊 Fridge Manager</h3>${ext(LINKS.github + '/fridge_manager', 'GitHub ↗')}</div>
-          <p>${s(
-            'A web app for what’s in the fridge: expiry dates, shopping list and recipes, with <strong>AI food recognition from photos</strong>. JWT auth, Docker Compose deployment (nginx + Spring Boot + PostgreSQL), responsive UI.',
-            'Una web app per il contenuto del frigorifero: scadenze, lista della spesa e ricette, con <strong>riconoscimento del cibo dalle foto tramite AI</strong>. Autenticazione JWT, deploy con Docker Compose (nginx + Spring Boot + PostgreSQL), interfaccia responsive.')}</p>
-          ${tags(['Java 21', 'Spring Boot 3.5', 'Spring Security', 'PostgreSQL', 'React', 'TypeScript', 'Docker', 'Claude API'])}
-        </div>
-        <div class="card">
-          <div class="card-head"><h3>🏍️ ${s('This website', 'Questo sito')}</h3>${ext(LINKS.github + '/my-website', 'GitHub ↗')}</div>
-          <p>${s(
-            'Vanilla JavaScript and Canvas, no frameworks: pixel art drawn in code, bike physics and road-graph pathfinding (Dijkstra) for tap-to-ride.',
-            'JavaScript puro e Canvas, senza framework: pixel art disegnata via codice, fisica della moto e pathfinding sul grafo delle strade (Dijkstra) per il "tocca e vai".')}</p>
-          <p>${s(
-            'The <strong>“Ask about me” assistant</strong> runs on a Spring Boot (Java 21) backend that calls Claude through the official Anthropic Java SDK. It answers only from a curated profile, uses prompt caching and structured output (answer + the section to open next), and is protected by per-visitor rate limits and a global daily cap.',
-            'L’<strong>assistente “Chiedi di me”</strong> gira su un backend Spring Boot (Java 21) che chiama Claude tramite l’SDK Java ufficiale di Anthropic. Risponde solo in base a un profilo curato, usa prompt caching e structured output (risposta + sezione da aprire) ed è protetto da rate limit per visitatore e da un tetto giornaliero globale.')}</p>
-          ${tags(['JavaScript', 'Canvas', 'Pathfinding', 'Spring Boot', 'Java 21', 'Claude API', 'Docker'])}
-        </div>
-        <h3 class="sub">${s('Fresh from GitHub', 'Appena usciti da GitHub')}</h3>
-        <div class="gh-projects" data-gh-projects><p class="meta">${s('Loading repositories…', 'Carico i repository…')}</p></div>
+        <div class="gh-projects" data-gh-projects>${Object.values(PROJECTS).map((card) => card(s)).join('')}</div>
+        <p class="meta gh-sync">🔄 ${s('Kept in sync with my GitHub automatically.', 'Sincronizzati automaticamente con il mio GitHub.')} ${ext(LINKS.github, 'github.com/Paolo994 ↗')}</p>
         <p class="note">🛠️ ${s('Daily AI-assisted development with Claude Code, GitHub Copilot and OpenAI Codex.', 'Sviluppo quotidiano assistito dall’AI con Claude Code, GitHub Copilot e OpenAI Codex.')}</p>`
     },
     {
@@ -534,5 +542,5 @@
     }
   ];
 
-  window.SITE = { LINKS, UI, SECTIONS, CASES };
+  window.SITE = { LINKS, UI, SECTIONS, CASES, PROJECTS };
 })();

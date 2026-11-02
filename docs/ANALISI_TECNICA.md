@@ -203,8 +203,10 @@ sequenceDiagram
 - Se un repository non ha descrizione, usa il primo paragrafo del README: salta titoli, badge, blocchi di
   codice, tabelle e citazioni, rimuove la sintassi markdown e taglia a 240 caratteri.
 - Se GitHub non risponde, resta valido l'ultimo elenco scaricato.
-- Nel Lab compaiono sotto "Fresh from GitHub", esclusi quelli che hanno già una card scritta a mano
-  (`CURATED` in `js/github.js`). L'assistente li conosce tramite il blocco 2 del prompt.
+- Nel Lab, "Side projects" è un unico elenco con tutti i repository, dal più aggiornato. Un repository con
+  una card scritta a mano (`PROJECTS` in `js/content.js`, indicizzato per nome del repo) usa quella; gli altri
+  ricevono una card automatica. Finché l'elenco non arriva, o se GitHub non risponde, restano visibili le card
+  scritte a mano. L'assistente conosce i repository tramite il blocco 2 del prompt.
 
 ### 5.3 Cosa resta scritto a mano
 

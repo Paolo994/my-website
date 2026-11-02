@@ -48,9 +48,10 @@ Dockerfile            one container: static site + API
 ## Live content
 
 - **CV:** see above. The CV file is not in git (it is personal); keep it locally in `assets/cv/`.
-- **GitHub projects:** every public, non-fork, non-archived repository appears automatically in the Lab under
-  "Fresh from GitHub" (repos with a hand-written card are listed in `CURATED` in `js/github.js`). The card uses
-  the repository description; if it's empty, the first paragraph of the README. Tip: give every repo an English
+- **GitHub projects:** the Lab's "Side projects" is one list with every public, non-fork, non-archived
+  repository, most recently updated first. A repo with a hand-written card (`PROJECTS` in `js/content.js`,
+  keyed by repo name) uses that card; any other repo gets an automatic card from its GitHub description (or,
+  if empty, the first paragraph of the README), language and topics. Tip: give every repo an English
   description and a few topics on GitHub, they become the card's text and tags.
 - **Site text** (`js/content.js`) is hand-written and does not change by itself when the CV changes.
 

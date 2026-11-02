@@ -294,8 +294,8 @@ kbd {
 .quest h3 { font-size: 16px; margin: 0 0 4px; }
 .quest p { margin: 0; color: #dcd8e8; font-size: 15px; }
 
-.gh-card .card-head span { font-size: 14px; white-space: nowrap; }
-.gh-card p:last-child { margin-bottom: 0; }
+.gh-projects .card-head span { font-size: 14px; white-space: nowrap; }
+.gh-sync { margin-top: -4px; }
 .content h3.sub { font: 11px/1.6 var(--pixel); color: var(--accent); margin: 24px 0 12px; }
 .passion { padding: 14px 16px; margin: 0 0 12px; background: var(--bg-3); border: 2px solid var(--line); }
 .passion h3 { margin: 0 0 6px; }
