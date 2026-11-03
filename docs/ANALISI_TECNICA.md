@@ -297,4 +297,4 @@ Verifiche end-to-end fatte con Chrome headless (Puppeteer):
 | La prima domanda dopo un'ora di inattività è lenta | Riscaldamento periodico della cache, o modello più leggero (`ANTHROPIC_MODEL`) |
 | Nessuna risposta in streaming | Server-Sent Events, se le risposte diventassero più lunghe |
 | Nessuna statistica di visita | GoatCounter o Plausible, rispettosi della privacy |
-| `og:image` relativo: le anteprime dei link potrebbero non mostrare l'immagine | URL assoluto una volta scelto il dominio (vedi `docs/DEPLOY_VPS.md`) |
+| ~~`og:image` relativo~~ | Risolto: URL assoluto su `https://paolociotta.com` |
