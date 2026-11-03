@@ -6,6 +6,9 @@ There is also a classic, scrollable view for people in a hurry, EN/IT switching,
 **"Ask about me" AI assistant** backed by Spring Boot and Claude.
 
 Technical analysis (Italian): [docs/ANALISI_TECNICA.md](docs/ANALISI_TECNICA.md).
+Deploy on a VPS with HTTPS (Italian): [docs/DEPLOY_VPS.md](docs/DEPLOY_VPS.md).
+
+Privacy: no cookies, no analytics, fonts self-hosted (no requests to Google); see `privacy.html`.
 
 ## Structure
 
@@ -99,6 +102,8 @@ Then serve the site from a local web server (for example open `index.html` from 
 Tests: `cd backend && mvn test`.
 
 ## Deploy
+
+**Recommended: VPS + Caddy** with `compose.prod.yml` (HTTPS, security headers, no access logs). Step-by-step guide: [docs/DEPLOY_VPS.md](docs/DEPLOY_VPS.md).
 
 **Option A, one container (simplest):** build the `Dockerfile` and deploy it on any container host
 (Render, Fly.io, Railway, a VPS). Set `ANTHROPIC_API_KEY`, and `SITE_PORT` if the host requires a

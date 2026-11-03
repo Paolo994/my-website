@@ -11,9 +11,9 @@
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#0f1020">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏍️</text></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="preload" href="assets/fonts/press-start-2p-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="mode-start">
@@ -49,6 +49,7 @@
         <button class="btn btn-ghost btn-big" data-action="classic">📄 <span data-i18n="classicCta"></span></button>
       </div>
       <p class="start-hint" data-i18n-device="startHint"></p>
+      <a class="privacy-link" href="privacy.html" data-i18n="privacy"></a>
     </div>
   </section>
 
@@ -93,7 +94,7 @@
     <div class="classic-inner">
       <nav class="classic-nav" id="classic-nav" aria-label="Sections"></nav>
       <div id="classic-sections" class="content"></div>
-      <footer class="classic-foot">© <span id="year"></span> Paolo Ciotta · <span data-i18n="madeWith"></span></footer>
+      <footer class="classic-foot">© <span id="year"></span> Paolo Ciotta · <span data-i18n="madeWith"></span> · <a class="privacy-link" href="privacy.html" data-i18n="privacy"></a></footer>
     </div>
   </main>
 
@@ -113,7 +114,7 @@
       <input id="ask-input" type="text" maxlength="500" autocomplete="off" aria-label="Question">
       <button class="btn btn-accent" type="submit" data-i18n="askSend"></button>
     </form>
-    <p class="ask-note" data-i18n="askNote"></p>
+    <p class="ask-note"><span data-i18n="askNote"></span> <a href="privacy.html" target="_blank" rel="noopener" data-i18n="privacy"></a></p>
   </aside>
 
   <noscript>

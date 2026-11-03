@@ -1,0 +1,22 @@
+# Caddy: HTTPS certificates (Let's Encrypt) obtained and renewed automatically.
+# DOMAIN comes from .env (e.g. DOMAIN=paolociotta.dev).
+# No `log` directive on purpose: Caddy keeps no access logs, so visitor IPs are not stored.
+
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy site:8787
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+		X-Frame-Options "DENY"
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.github.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+		-Server
+	}
+}
+
+www.{$DOMAIN} {
+	redir https://{$DOMAIN}{uri} permanent
+}

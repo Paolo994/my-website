@@ -1,0 +1,63 @@
+# Production on a VPS: Caddy (HTTPS, ports 80/443) in front of the site container.
+# The site container is NOT exposed to the internet: only Caddy can reach it.
+#
+#   docker compose -f compose.prod.yml up -d --build
+#
+# Settings come from .env (DOMAIN, ANTHROPIC_API_KEY, ...). See docs/DEPLOY_VPS.md.
+services:
+  site:
+    build: .
+    image: paolo-site
+    container_name: paolo-site
+    expose:
+      - "8787"
+    environment:
+      ASSISTANT_ENABLED: ${ASSISTANT_ENABLED:-true}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-opus-5-5}
+      ASSISTANT_EFFORT: ${ASSISTANT_EFFORT:-low}
+      RATE_PER_MINUTE: ${RATE_PER_MINUTE:-8}
+      RATE_PER_DAY: ${RATE_PER_DAY:-40}
+      RATE_GLOBAL_PER_DAY: ${RATE_GLOBAL_PER_DAY:-500}
+      LOG_QUESTIONS: "false"
+      SITE_PORT: "8787"
+      GITHUB_USER: ${GITHUB_USER:-Paolo994}
+      GITHUB_REFRESH: ${GITHUB_REFRESH:-24h}
+      # same origin behind Caddy: no other site may call the API
+      ALLOWED_ORIGINS: https://${DOMAIN}
+    volumes:
+      # Live CV: replace the PDF on the server, no rebuild needed
+      - ./assets/cv:/app/site/assets/cv:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8787 && printf \"GET /actuator/health HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3'"]
+      interval: 30s
+      timeout: 5s
+      start_period: 40s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  caddy:
+    image: caddy:2
+    container_name: paolo-caddy
+    depends_on:
+      - site
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in .env, e.g. DOMAIN=paolociotta.dev}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

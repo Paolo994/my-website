@@ -278,7 +278,12 @@ Verifiche end-to-end fatte con Chrome headless (Puppeteer):
 7. **Falso "offline" corretto**: era causato da file JavaScript vecchi rimasti nella cache del browser.
    Ora i file statici escono con `no-cache` e gli errori sono distinti per tipo.
 8. **Pubblicazione** su `github.com/Paolo994/my-website`, con il CV escluso e il telefono rimosso anche da un test.
-9. **Contenuti vivi**: CV letto dall'assistente e ricaricato a ogni modifica; progetti GitHub automatici nel Lab.
+9. **Contenuti vivi**: CV letto dall'assistente e ricaricato a ogni modifica; progetti GitHub automatici nel Lab,
+   in un unico elenco con le card scritte a mano; aggiornamento configurabile (`GITHUB_REFRESH`, default 24 ore).
+10. **Privacy e produzione**: font serviti dal sito invece che da Google Fonts (nessun IP condiviso con Google);
+    pagina `privacy.html` in inglese e italiano; nessun cookie quindi nessun banner. Configurazione per VPS
+    (`compose.prod.yml`, `deploy/Caddyfile`): HTTPS automatico, Content-Security-Policy, HSTS, nessun log di accesso,
+    container dell'app non esposto. Verificata in locale: nessuna violazione CSP e nessuna richiesta a server esterni.
 
 ## 10. Limiti noti e possibili sviluppi
 
@@ -292,4 +297,4 @@ Verifiche end-to-end fatte con Chrome headless (Puppeteer):
 | La prima domanda dopo un'ora di inattività è lenta | Riscaldamento periodico della cache, o modello più leggero (`ANTHROPIC_MODEL`) |
 | Nessuna risposta in streaming | Server-Sent Events, se le risposte diventassero più lunghe |
 | Nessuna statistica di visita | GoatCounter o Plausible, rispettosi della privacy |
-| `og:image` relativo: le anteprime dei link potrebbero non mostrare l'immagine | URL assoluto una volta scelto il dominio |
+| `og:image` relativo: le anteprime dei link potrebbero non mostrare l'immagine | URL assoluto una volta scelto il dominio (vedi `docs/DEPLOY_VPS.md`) |

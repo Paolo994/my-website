@@ -13,7 +13,7 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 RUN useradd --system --uid 1001 app
 COPY --from=build /src/target/site-assistant-1.0.0.jar app.jar
-COPY index.html /app/site/
+COPY index.html privacy.html /app/site/
 COPY css /app/site/css
 COPY js /app/site/js
 COPY assets /app/site/assets

@@ -394,6 +394,16 @@ text.d-note[x="10"] { text-anchor: start; font: 9px var(--pixel); }
 .ask-form.busy button { opacity: .5; pointer-events: none; }
 .ask-note { margin: 0; padding: 0 16px 12px; color: var(--muted); font-size: 12px; }
 
+/* ------------------------------------------------------------ privacy page + links */
+.legal-page { background: var(--bg); }
+.legal { max-width: 760px; margin: 0 auto; padding: 32px 16px 56px; }
+.legal h1 { font: 18px/1.5 var(--pixel); color: var(--accent); margin: 24px 0 4px; }
+.legal h2 { font-size: 18px; margin: 26px 0 8px; color: var(--teal); }
+.legal p, .legal li { color: #dcd8e8; }
+.legal hr { border: 0; border-top: 3px solid var(--line); margin: 40px 0; }
+.privacy-link { color: var(--muted); font-size: 13px; }
+.start-card .privacy-link { display: inline-block; margin-top: 12px; }
+
 /* ------------------------------------------------------------ small screens */
 @media (max-width: 760px) {
   :root { --topbar: 56px; }
