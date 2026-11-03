@@ -173,6 +173,8 @@ kbd {
   animation: pop .16s ease-out;
 }
 .menu-card { width: min(520px, 100%); }
+/* grid items default to min-width:auto and would grow to fit wide content (diagrams): keep them inside the screen */
+.menu-card, .panel, .panel-body, .case, .case-body { min-width: 0; }
 @keyframes pop { from { transform: scale(.96); opacity: 0; } }
 .menu-head, .panel-head {
   display: flex; align-items: center; gap: 12px;
@@ -343,6 +345,8 @@ kbd {
 .d-note.ok { fill: var(--green); }
 .d-note.bad { fill: #ff5d73; }
 text.d-note[x="10"] { text-anchor: start; font: 9px var(--pixel); }
+.diagram-hint { display: none; margin: -2px 0 8px; color: var(--muted); font-size: 12.5px; text-align: right; }
+html[lang="en"] .diagram-hint [lang="it"], html[lang="it"] .diagram-hint [lang="en"] { display: none; }
 
 /* ------------------------------------------------------------ "Ask about me" assistant */
 .ask-fab {
@@ -428,6 +432,7 @@ text.d-note[x="10"] { text-anchor: start; font: 9px var(--pixel); }
   .case-body { padding: 0 10px 4px; }
   .diagram { padding: 6px; margin-left: -4px; margin-right: -4px; }
   .diagram svg { min-width: 400px; }
+  .diagram-hint { display: block; }
   .ask { border-left: 0; box-shadow: none; }
   .ask-fab { padding: 11px 13px; font-size: 14px; }
   .mode-game .ask-fab { top: calc(var(--topbar) + 56px); }

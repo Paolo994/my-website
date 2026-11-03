@@ -106,7 +106,8 @@
   function svg(h, title, body) {
     const marker = (id) => `<marker id="arr-${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="d-head ${id}"/></marker>`;
     return `<figure class="diagram"><svg viewBox="0 0 480 ${h}" role="img" aria-label="${title}">
-      <defs>${marker('n')}${marker('bad')}${marker('ok')}${marker('dash')}</defs>${body}</svg></figure>`;
+      <defs>${marker('n')}${marker('bad')}${marker('ok')}${marker('dash')}</defs>${body}</svg></figure>
+      <p class="diagram-hint"><span lang="en">Swipe to see the whole diagram →</span><span lang="it">Scorri per vedere tutto il diagramma →</span></p>`;
   }
 
   // ---------- case studies ----------
